@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     defaultConfig {
-        applicationId "com.ywl532.jnithread"
+        applicationId "com.ywl5320.jnithread"
         minSdkVersion 16
         targetSdkVersion 26
         versionCode 1

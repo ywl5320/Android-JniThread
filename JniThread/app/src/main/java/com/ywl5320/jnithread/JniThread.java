@@ -1,4 +1,4 @@
-package com.ywl532.jnithread;
+package com.ywl5320.jnithread;
 
 /**
  * Created by ywl on 2017-11-30.
@@ -12,5 +12,7 @@ public class JniThread {
     }
 
     public native void normalThread();
+
+    public native void mutexThread();
 
 }

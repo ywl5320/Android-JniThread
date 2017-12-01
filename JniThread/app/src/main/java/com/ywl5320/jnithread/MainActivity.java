@@ -1,9 +1,8 @@
-package com.ywl532.jnithread;
+package com.ywl5320.jnithread;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,5 +17,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void normalThread(View view) {
         jniThread.normalThread();
+    }
+
+    public void mutexThread(View view) {
+        jniThread.mutexThread();
     }
 }
