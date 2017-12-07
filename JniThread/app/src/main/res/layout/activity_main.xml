@@ -1,38 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.ywl532.jnithread.MainActivity">
+    android:orientation="vertical">
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Jni一般线程"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:onClick="normalThread"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Jni线程互斥锁"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:onClick="mutexThread"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Jni全局Listener调用Java方法"
         android:textAllCaps="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:onClick="jniCallback"/>
 
 </LinearLayout>

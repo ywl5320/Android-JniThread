@@ -1,11 +1,37 @@
+//
+// Created by ywl5320
+//
+
 #include <jni.h>
 
-#include "AndroidLog.h"
+#include "WlAndroidLog.h"
 #include "pthread.h"
 #include "unistd.h"
 #include "queue"
+#include "WlListener.h"
 
-//1、一般线程
+
+/*
+    pthread 文档：
+
+1、pthread_t :用于声明一个线程对象如：pthread_t thread;
+2、pthread_creat :用于创建一个实际的线程如：pthread_create(&pthread,NULL,threadCallBack,NULL);其总共接收4个参数，第一个参数为pthread_t对象，第二个参数为线程的一些属性我们一般传NULL就行，第三个参数为线程执行的函数（ void* threadCallBack(void *data) ），第四个参数是传递给线程的参数是void*类型的既可以传任意类型。
+3、pthread_exit :用于退出线程如：pthread_exit(&thread)，参数也可以传NULL。注：线程回调函数最后必须调用此方法，不然APP会退出（挂掉）。
+4、pthread_mutex_t :用于创建线程锁对象如：pthread_mutex_t mutex;
+5、pthread_mutex_init :用于初始化pthread_mutex_t锁对象如：pthread_mutex_init(&mutex, NULL);
+6、pthread_mutex_destroy :用于销毁pthread_mutex_t锁对象如：pthread_mutex_destroy(&mutex);
+7、pthread_cond_t :用于创建线程条件对象如：pthread_cond_t cond;
+8、pthread_cond_init :用于初始化pthread_cond_t条件对象如：pthread_cond_init(&cond, NULL);
+9、pthread_cond_destroy :用于销毁pthread_cond_t条件对象如：pthread_cond_destroy(&cond);
+10、pthread_mutex_lock :用于上锁mutex，本线程上锁后的其他变量是不能被别的线程操作的如：pthread_mutex_lock(&mutex);
+11、pthread_mutex_unlock :用于解锁mutex，解锁后的其他变量可以被其他线程操作如：pthread_mutex_unlock(&mutex);
+12、pthread_cond_signal :用于发出条件信号如：pthread_cond_signal(&mutex, &cond);
+13、pthread_cond_wait :用于线程阻塞等待，直到pthread_cond_signal发出条件信号后才执行退出线程阻塞执行后面的操作。
+
+*/
+
+
+//1、-----------------------------一般线程----------------------------------------
 pthread_t pthread;//线程对象
 void *threadDoThings(void *data)
 {
@@ -24,7 +50,7 @@ Java_com_ywl5320_jnithread_JniThread_normalThread(JNIEnv *env, jobject instance)
 }
 
 
-//2、线程锁
+//2、-------------------------------线程锁------------------------------------------
 
 std::queue<int> queue; //产品队列，里面是int的队列
 pthread_t pthread_produc; //生产者线程
@@ -92,20 +118,36 @@ Java_com_ywl5320_jnithread_JniThread_mutexThread(JNIEnv *env, jobject instance) 
     initMutex();
 }
 
-/*
+//3、-------------------------------jni线程回调------------------------------------------
 
-1、pthread_t :用于声明一个线程对象如：pthread_t thread;
-2、pthread_creat :用于创建一个实际的线程如：pthread_create(&pthread,NULL,threadCallBack,NULL);其总共接收4个参数，第一个参数为pthread_t对象，第二个参数为线程的一些属性我们一般传NULL就行，第三个参数为线程执行的函数（ void* threadCallBack(void *data) ），第四个参数是传递给线程的参数是void*类型的既可以传任意类型。
-3、pthread_exit :用于退出线程如：pthread_exit(&thread)，参数也可以传NULL。注：线程回调函数最后必须调用此方法，不然APP会退出（挂掉）。
-4、pthread_mutex_t :用于创建线程锁对象如：pthread_mutex_t mutex;
-5、pthread_mutex_init :用于初始化pthread_mutex_t锁对象如：pthread_mutex_init(&mutex, NULL);
-6、pthread_mutex_destroy :用于销毁pthread_mutex_t锁对象如：pthread_mutex_destroy(&mutex);
-7、pthread_cond_t :用于创建线程条件对象如：pthread_cond_t cond;
-8、pthread_cond_init :用于初始化pthread_cond_t条件对象如：pthread_cond_init(&cond, NULL);
-9、pthread_cond_destroy :用于销毁pthread_cond_t条件对象如：pthread_cond_destroy(&cond);
-10、pthread_mutex_lock :用于上锁mutex，本线程上锁后的其他变量是不能被别的线程操作的如：pthread_mutex_lock(&mutex);
-11、pthread_mutex_unlock :用于解锁mutex，解锁后的其他变量可以被其他线程操作如：pthread_mutex_unlock(&mutex);
-12、pthread_cond_signal :用于发出条件信号如：pthread_cond_signal(&mutex, &cond);
-13、pthread_cond_wait :用于线程阻塞等待，直到pthread_cond_signal发出条件信号后才执行退出线程阻塞执行后面的操作。
+JavaVM* jvm;
 
-*/
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm,void* reserved){
+    JNIEnv *env;
+    jvm = vm;
+    if(vm->GetEnv((void**)&env,JNI_VERSION_1_6)!=JNI_OK){
+        return -1;
+    }
+    return JNI_VERSION_1_6;
+}
+
+pthread_t callbackThread;
+
+void *callBackT(void *data)
+{
+    //获取WlListener指针
+    WlListener *wlListener = (WlListener *) data;
+    //在子线程中调用回调方法
+    wlListener->onError(1, 200, "Child thread running success!");
+    pthread_exit(&callbackThread);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_ywl5320_jnithread_JniThread_callbackThread(JNIEnv *env, jobject jobj) {
+    WlListener *wlListener = new WlListener(jvm, env, env->NewGlobalRef(jobj));
+    //在主线程中调用java方法
+    wlListener->onError(0, 100, "JNIENV thread running success!");
+    //开启子线程，并把WlListener指针传递到子线程中
+    pthread_create(&callbackThread, NULL, callBackT, wlListener);
+}

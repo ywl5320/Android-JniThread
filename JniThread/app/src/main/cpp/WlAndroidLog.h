@@ -1,7 +1,7 @@
 //
-// Created by ywl on 2017-11-12.
+// Created by ywl5320 on 2017-11-12.
 //
-
+#pragma once
 #ifndef WLPLAYER_ANDROIDLOG_H
 #define WLPLAYER_ANDROIDLOG_H
 
